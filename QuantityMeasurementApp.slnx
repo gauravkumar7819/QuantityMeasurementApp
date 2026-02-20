@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="QuantityMeasurement.Core/QuantityMeasurement.Core.csproj" />
+  <Project Path="QuantityMeasurement.Tests/QuantityMeasurement.Tests.csproj" />
+</Solution>
