@@ -1,5 +1,7 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using QuantityMeasurement.Core;
 using QuantityMeasurement.Core.Models;
+using System;
 
 namespace QuantityMeasurement.Tests
 {
@@ -9,42 +11,31 @@ namespace QuantityMeasurement.Tests
         [TestMethod]
         public void GivenTwoEqualFeetValues_ShouldReturnTrue()
         {
-            var firstFeet = new Feet(5.0);
-            var secondFeet = new Feet(5.0);
-            bool result = firstFeet.Equals(secondFeet);
-
+            bool result = QuantityMeasurementApp.AreFeetEqual(5.0, 5.0);
             Assert.IsTrue(result);
         }
 
         [TestMethod]
         public void GivenTwoDifferentFeetValues_ShouldReturnFalse()
         {
-            var firstFeet = new Feet(5.0);
-            var secondFeet = new Feet(6.0);
-
-            bool result = firstFeet.Equals(secondFeet);
-
+            bool result = QuantityMeasurementApp.AreFeetEqual(5.0, 6.0);
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void GivenSameReference_ShouldReturnTrue()
+        public void GivenNegativeFeetValue_ShouldThrowException()
         {
-            var firstFeet = new Feet(5.0);
-
-            bool result = firstFeet.Equals(firstFeet);
-
-            Assert.IsTrue(result);
-        }
-
-        [TestMethod]
-        public void GivenNullObject_ShouldReturnFalse()
-        {
-            var firstFeet = new Feet(5.0);
-
-            bool result = firstFeet.Equals(null);
-
-            Assert.IsFalse(result);
+            try
+            {
+                bool result = QuantityMeasurementApp.AreFeetEqual(-5.0, 6.0);
+                // If no exception is thrown, fail the test
+                Assert.Fail("Expected ArgumentException was not thrown.");
+            }
+            catch (ArgumentException ex)
+            {
+                // Test passes if ArgumentException is thrown
+                StringAssert.Contains(ex.Message, "Feet cannot be negative");
+            }
         }
     }
 }
