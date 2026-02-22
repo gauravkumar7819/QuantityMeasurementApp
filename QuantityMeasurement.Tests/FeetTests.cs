@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using QuantityMeasurement.Core;
+using QuantityMeasurement.Core.Service;
 using QuantityMeasurement.Core.Models;
 using System;
 
@@ -11,14 +11,14 @@ namespace QuantityMeasurement.Tests
         [TestMethod]
         public void GivenTwoEqualFeetValues_ShouldReturnTrue()
         {
-            bool result = QuantityMeasurementApp.AreFeetEqual(5.0, 5.0);
+            bool result = QuantityMeasurementService.AreFeetEqual(5.0, 5.0);
             Assert.IsTrue(result);
         }
 
         [TestMethod]
         public void GivenTwoDifferentFeetValues_ShouldReturnFalse()
         {
-            bool result = QuantityMeasurementApp.AreFeetEqual(5.0, 6.0);
+            bool result = QuantityMeasurementService.AreFeetEqual(5.0, 6.0);
             Assert.IsFalse(result);
         }
 
@@ -27,7 +27,7 @@ namespace QuantityMeasurement.Tests
         {
             try
             {
-                bool result = QuantityMeasurementApp.AreFeetEqual(-5.0, 6.0);
+                bool result = QuantityMeasurementService.AreFeetEqual(-5.0, 6.0);
                 // If no exception is thrown, fail the test
                 Assert.Fail("Expected ArgumentException was not thrown.");
             }

@@ -31,11 +31,14 @@ namespace QuantityMeasurement.Core.Models
         }
 
         // Override Equals
-// Length.cs
-public override bool Equals(object? obj)
-{
-    return obj is Length other && Equals(other);
-}
+        public override bool Equals(object obj)
+        {
+            if (this == obj) return true;
+            if (obj == null || GetType() != obj.GetType()) return false;
+
+            Length other = (Length)obj;
+            return Compare(other);
+        }
 
         public override int GetHashCode()
         {

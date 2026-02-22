@@ -1,6 +1,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using QuantityMeasurement.Core;
+using QuantityMeasurement.Core.Enums;
 using QuantityMeasurement.Core.Models;
+using QuantityMeasurement.Core.Service;
 using System;
 
 namespace QuantityMeasurement.Tests
@@ -11,14 +13,14 @@ namespace QuantityMeasurement.Tests
         [TestMethod]
         public void GivenEqualFeetAndInches_ShouldReturnTrue()
         {
-            bool result = QuantityMeasurementApp.AreLengthsEqual(1.0, LengthUnit.FEET, 12.0, LengthUnit.INCHES);
+            bool result = QuantityMeasurementService.AreLengthsEqual(1.0, LengthUnit.FEET, 12.0, LengthUnit.INCHES);
             Assert.IsTrue(result);
         }
 
         [TestMethod]
         public void GivenDifferentFeetAndInches_ShouldReturnFalse()
         {
-            bool result = QuantityMeasurementApp.AreLengthsEqual(1.0, LengthUnit.FEET, 11.0, LengthUnit.INCHES);
+            bool result = QuantityMeasurementService.AreLengthsEqual(1.0, LengthUnit.FEET, 11.0, LengthUnit.INCHES);
             Assert.IsFalse(result);
         }
 
@@ -27,7 +29,7 @@ namespace QuantityMeasurement.Tests
         {
             try
             {
-                bool result = QuantityMeasurementApp.AreLengthsEqual(-1.0, LengthUnit.FEET, 12.0, LengthUnit.INCHES);
+                bool result = QuantityMeasurementService.AreLengthsEqual(-1.0, LengthUnit.FEET, 12.0, LengthUnit.INCHES);
                 Assert.Fail("Expected ArgumentException was not thrown.");
             }
             catch (ArgumentException ex)
@@ -41,7 +43,7 @@ namespace QuantityMeasurement.Tests
         {
             try
             {
-                bool result = QuantityMeasurementApp.AreLengthsEqual(1.0, LengthUnit.FEET, -12.0, LengthUnit.INCHES);
+                bool result = QuantityMeasurementService.AreLengthsEqual(1.0, LengthUnit.FEET, -12.0, LengthUnit.INCHES);
                 Assert.Fail("Expected ArgumentException was not thrown.");
             }
             catch (ArgumentException ex)

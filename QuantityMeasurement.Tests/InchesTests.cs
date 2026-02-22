@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using QuantityMeasurement.Core;
 using QuantityMeasurement.Core.Models;
+using QuantityMeasurement.Core.Service;
 using System;
 
 namespace QuantityMeasurement.Tests
@@ -11,14 +12,14 @@ namespace QuantityMeasurement.Tests
         [TestMethod]
         public void GivenTwoEqualInchesValues_ShouldReturnTrue()
         {
-            bool result = QuantityMeasurementApp.AreInchesEqual(12.0, 12.0);
+            bool result = QuantityMeasurementService.AreInchesEqual(12.0, 12.0);
             Assert.IsTrue(result);
         }
 
         [TestMethod]
         public void GivenTwoDifferentInchesValues_ShouldReturnFalse()
         {
-            bool result = QuantityMeasurementApp.AreInchesEqual(12.0, 10.0);
+            bool result = QuantityMeasurementService.AreInchesEqual(12.0, 10.0);
             Assert.IsFalse(result);
         }
 
@@ -27,7 +28,7 @@ namespace QuantityMeasurement.Tests
         {
             try
             {
-                bool result = QuantityMeasurementApp.AreInchesEqual(-5.0, 6.0);
+                bool result = QuantityMeasurementService.AreInchesEqual(-5.0, 6.0);
                 // Agar exception nahi aayi, test fail karo
                 Assert.Fail("Expected ArgumentException was not thrown.");
             }
