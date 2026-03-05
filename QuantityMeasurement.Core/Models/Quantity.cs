@@ -21,13 +21,16 @@ namespace QuantityMeasurement.Core.Models
 
         private double ToBase() => Unit.ConvertToBaseUnit(Value);
 
+        // ------------------ CONVERT ------------------
+
         public Quantity<U> ConvertTo(U targetUnit)
         {
             double baseValue = ToBase();
             double targetValue = targetUnit.ConvertFromBaseUnit(baseValue);
-
             return new Quantity<U>(targetValue, targetUnit);
         }
+
+        // ------------------ ADD ------------------
 
         public Quantity<U> Add(Quantity<U> other) => Add(other, this.Unit);
 
@@ -41,6 +44,36 @@ namespace QuantityMeasurement.Core.Models
             return new Quantity<U>(targetValue, targetUnit);
         }
 
+        // ------------------ UC12: SUBTRACT ------------------
+
+        public Quantity<U> Subtract(Quantity<U> other) => Subtract(other, this.Unit);
+
+        public Quantity<U> Subtract(Quantity<U> other, U targetUnit)
+        {
+            if (other is null) throw new ArgumentNullException(nameof(other));
+
+            double diffBase = this.ToBase() - other.ToBase();
+            double targetValue = targetUnit.ConvertFromBaseUnit(diffBase);
+
+            return new Quantity<U>(targetValue, targetUnit);
+        }
+
+
+
+        public double Divide(Quantity<U> other)
+        {
+            if (other is null) throw new ArgumentNullException(nameof(other));
+
+            double divisorBase = other.ToBase();
+            if (Math.Abs(divisorBase) <= Epsilon)
+                throw new DivideByZeroException("Cannot divide by a zero quantity");
+
+            double dividendBase = this.ToBase();
+            return dividendBase / divisorBase;
+        }
+
+        // ------------------ EQUALITY ------------------
+
         public override bool Equals(object? obj)
         {
             if (obj is null) return false;
@@ -52,12 +85,10 @@ namespace QuantityMeasurement.Core.Models
 
         public override int GetHashCode()
         {
-            // stable hash based on base value bucket
             double baseValue = ToBase();
             long bucket = (long)Math.Round(baseValue / Epsilon);
             return HashCode.Combine(bucket, Unit.GetType());
         }
-
         public override string ToString() => $"Quantity({Value}, {Unit.GetUnitName()})";
     }
 }
