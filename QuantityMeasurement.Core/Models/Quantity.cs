@@ -30,46 +30,80 @@ namespace QuantityMeasurement.Core.Models
             return new Quantity<U>(targetValue, targetUnit);
         }
 
+        // =========================
+        // UC13 REFACTOR
+        // =========================
+
+        private enum ArithmeticOperation
+        {
+            Add,
+            Subtract,
+            Divide
+        }
+
+        private void ValidateArithmeticOperands(Quantity<U> other)
+        {
+            if (other is null)
+                throw new ArgumentNullException(nameof(other));
+        }
+
+        private double PerformBaseArithmetic(Quantity<U> other, ArithmeticOperation operation)
+        {
+            ValidateArithmeticOperands(other);
+
+            double leftBase = this.ToBase();
+            double rightBase = other.ToBase();
+
+            return operation switch
+            {
+                ArithmeticOperation.Add => leftBase + rightBase,
+
+                ArithmeticOperation.Subtract => leftBase - rightBase,
+
+                ArithmeticOperation.Divide =>
+                    Math.Abs(rightBase) <= Epsilon
+                        ? throw new DivideByZeroException("Cannot divide by zero quantity")
+                        : leftBase / rightBase,
+
+                _ => throw new InvalidOperationException("Unsupported operation")
+            };
+        }
+
         // ------------------ ADD ------------------
 
-        public Quantity<U> Add(Quantity<U> other) => Add(other, this.Unit);
+        public Quantity<U> Add(Quantity<U> other)
+        {
+            return Add(other, this.Unit);
+        }
 
         public Quantity<U> Add(Quantity<U> other, U targetUnit)
         {
-            if (other is null) throw new ArgumentNullException(nameof(other));
-
-            double sumBase = this.ToBase() + other.ToBase();
-            double targetValue = targetUnit.ConvertFromBaseUnit(sumBase);
+            double baseResult = PerformBaseArithmetic(other, ArithmeticOperation.Add);
+            double targetValue = targetUnit.ConvertFromBaseUnit(baseResult);
 
             return new Quantity<U>(targetValue, targetUnit);
         }
 
-        // ------------------ UC12: SUBTRACT ------------------
+        // ------------------ SUBTRACT ------------------
 
-        public Quantity<U> Subtract(Quantity<U> other) => Subtract(other, this.Unit);
+        public Quantity<U> Subtract(Quantity<U> other)
+        {
+            return Subtract(other, this.Unit);
+        }
 
         public Quantity<U> Subtract(Quantity<U> other, U targetUnit)
         {
-            if (other is null) throw new ArgumentNullException(nameof(other));
-
-            double diffBase = this.ToBase() - other.ToBase();
-            double targetValue = targetUnit.ConvertFromBaseUnit(diffBase);
+            double baseResult = PerformBaseArithmetic(other, ArithmeticOperation.Subtract);
+            double targetValue = targetUnit.ConvertFromBaseUnit(baseResult);
 
             return new Quantity<U>(targetValue, targetUnit);
         }
 
-
+        // ------------------ DIVIDE ------------------
 
         public double Divide(Quantity<U> other)
         {
-            if (other is null) throw new ArgumentNullException(nameof(other));
-
-            double divisorBase = other.ToBase();
-            if (Math.Abs(divisorBase) <= Epsilon)
-                throw new DivideByZeroException("Cannot divide by a zero quantity");
-
-            double dividendBase = this.ToBase();
-            return dividendBase / divisorBase;
+            return PerformBaseArithmetic(other, ArithmeticOperation.Divide);
         }
 
         // ------------------ EQUALITY ------------------
@@ -89,6 +123,10 @@ namespace QuantityMeasurement.Core.Models
             long bucket = (long)Math.Round(baseValue / Epsilon);
             return HashCode.Combine(bucket, Unit.GetType());
         }
-        public override string ToString() => $"Quantity({Value}, {Unit.GetUnitName()})";
+
+        public override string ToString()
+        {
+            return $"Quantity({Value}, {Unit.GetUnitName()})";
+        }
     }
 }
