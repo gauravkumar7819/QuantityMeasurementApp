@@ -1,0 +1,58 @@
+using System;
+using QuantityMeasurement.Model.Measurables;
+using QuantityMeasurement.Model.Units;
+
+namespace QuantityMeasurement.Model.Models
+{
+    public sealed class QuantityVolume
+    {
+        private readonly Quantity<VolumeMeasurable> _inner;
+
+        public double Value => _inner.Value;
+        public VolumeUnit Unit => _inner.Unit.Unit;
+
+        public QuantityVolume(double value, VolumeUnit unit)
+        {
+            if (value < 0)
+                throw new ArgumentException($"{unit} cannot be negative");
+
+            _inner = new Quantity<VolumeMeasurable>(value, new VolumeMeasurable(unit));
+        }
+
+        public QuantityVolume ConvertTo(VolumeUnit targetUnit)
+        {
+            var converted = _inner.ConvertTo(new VolumeMeasurable(targetUnit));
+            return new QuantityVolume(converted.Value, targetUnit);
+        }
+
+        public QuantityVolume Add(QuantityVolume other, VolumeUnit targetUnit)
+        {
+            if (other is null)
+                throw new ArgumentException("Second operand cannot be null");
+
+            var sum = _inner.Add(other._inner, new VolumeMeasurable(targetUnit));
+            return new QuantityVolume(sum.Value, targetUnit);
+        }
+
+        public QuantityVolume Subtract(QuantityVolume other, VolumeUnit targetUnit)
+        {
+            if (other is null)
+                throw new ArgumentException("Second operand cannot be null");
+
+            var diff = _inner.Subtract(other._inner, new VolumeMeasurable(targetUnit));
+            return new QuantityVolume(diff.Value, targetUnit);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is not QuantityVolume other)
+                return false;
+
+            return _inner.Equals(other._inner);
+        }
+
+        public override int GetHashCode() => _inner.GetHashCode();
+
+        public override string ToString() => _inner.ToString();
+    }
+}
