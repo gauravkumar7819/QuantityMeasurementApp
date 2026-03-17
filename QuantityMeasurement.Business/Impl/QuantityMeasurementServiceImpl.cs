@@ -3,158 +3,317 @@ using QuantityMeasurement.Business.Interfaces;
 using QuantityMeasurement.Model.Units;
 using QuantityMeasurement.Model.Models;
 using QuantityMeasurement.Model.DTO;
+using QuantityMeasurement.Repository.Interfaces;
+using QuantityMeasurement.Model.Entities;
 
 namespace QuantityMeasurement.Business.Impl
 {
     public class QuantityMeasurementServiceImpl : IQuantityMeasurementService
     {
-        private static void ThrowIfNegative(double value, LengthUnit unit)
+        private readonly IQuantityMeasurementRepository _repo;
+
+        public QuantityMeasurementServiceImpl(IQuantityMeasurementRepository repo)
         {
-            if (value < 0)
-                throw new ArgumentException($"{unit} cannot be negative");
+            _repo = repo;
         }
 
-        // ------------------ UC1: Feet equality ------------------
-
-        public bool AreFeetEqual(double firstFeet, double secondFeet)
-        {
-            if (firstFeet < 0 || secondFeet < 0)
-                throw new ArgumentException("Feet cannot be negative");
-
-            var feet1 = new QuantityLength(firstFeet, LengthUnit.FEET);
-            var feet2 = new QuantityLength(secondFeet, LengthUnit.FEET);
-
-            return feet1.Equals(feet2);
-        }
-
-        // ------------------ UC2: Inches equality ------------------
-
-        public bool AreInchesEqual(double firstInches, double secondInches)
-        {
-            if (firstInches < 0 || secondInches < 0)
-                throw new ArgumentException("Inches cannot be negative");
-
-            var inch1 = new QuantityLength(firstInches, LengthUnit.INCHES);
-            var inch2 = new QuantityLength(secondInches, LengthUnit.INCHES);
-
-            return inch1.Equals(inch2);
-        }
-
-        // ------------------ UC3/UC4: Generic length equality ------------------
-
-        public bool AreQuantitiesEqual(
-            double value1, LengthUnit unit1,
-            double value2, LengthUnit unit2)
-        {
-            ThrowIfNegative(value1, unit1);
-            ThrowIfNegative(value2, unit2);
-
-            var length1 = new QuantityLength(value1, unit1);
-            var length2 = new QuantityLength(value2, unit2);
-
-            return length1.Equals(length2);
-        }
-
-        // ------------------ UC9: Weight equality ------------------
-
-        public bool AreWeightsEqual(double v1, WeightUnit u1, double v2, WeightUnit u2)
-        {
-            if (v1 < 0 || v2 < 0)
-                throw new ArgumentException("Weight cannot be negative");
-
-            var w1 = new QuantityWeight(v1, u1);
-            var w2 = new QuantityWeight(v2, u2);
-
-            return w1.Equals(w2);
-        }
-
-        // ------------------ UC6/UC7/UC12: Addition ------------------
-
-        public QuantityDTO Add(QuantityDTO q1, QuantityDTO q2)
-        {
-            if (q1 == null || q2 == null)
-                throw new ArgumentNullException("QuantityDTO cannot be null");
-
-            double result = q1.Value + q2.Value;
-
-            return new QuantityDTO
-            {
-                Value = result,
-                Unit = q1.Unit,
-                
-            };
-        }
-
-        // ------------------ UC12: Subtraction ------------------
-
-        public QuantityDTO Subtract(QuantityDTO q1, QuantityDTO q2)
-        {
-            if (q1 == null || q2 == null)
-                throw new ArgumentNullException("QuantityDTO cannot be null");
-
-            double result = q1.Value - q2.Value;
-
-            return new QuantityDTO
-            {
-                Value = result,
-                Unit = q1.Unit,
-               
-            };
-        }
-
-        // ------------------ UC12: Division ------------------
-
-        public double Divide(QuantityDTO q1, QuantityDTO q2)
-        {
-            if (q1 == null || q2 == null)
-                throw new ArgumentNullException("QuantityDTO cannot be null");
-
-            if (q2.Value == 0)
-                throw new ArgumentException("Cannot divide by zero");
-
-            return q1.Value / q2.Value;
-        }
-        public QuantityDTO Convert(QuantityDTO quantity, string targetUnit)
-{
-    if (quantity == null)
-        throw new ArgumentNullException(nameof(quantity));
-
-    var fromUnit = Enum.Parse<LengthUnit>(quantity.Unit, true);
-    var toUnit = Enum.Parse<LengthUnit>(targetUnit, true);
-
-    var length = new QuantityLength(quantity.Value, fromUnit);
-    var converted = length.ConvertTo(toUnit);
-
-    return new QuantityDTO
-    {
-        Value = converted.Value,
-        Unit = converted.Unit.ToString(),
-    };
-}
-
-        public bool AreLengthsEqual(double value1, LengthUnit unit1, double value2, LengthUnit unit2)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool AreVolumesEqual(double v1, VolumeUnit u1, double v2, VolumeUnit u2)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool AreTemperaturesEqual(double v1, TemperatureUnit u1, double v2, TemperatureUnit u2)
-        {
-            throw new NotImplementedException();
-        }
+        // ------------------ Add ------------------
 
         public QuantityDTO Add(QuantityDTO q1, QuantityDTO q2, string targetUnit)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var unit = Enum.Parse<LengthUnit>(targetUnit, true);
+
+                var l1 = new QuantityLength(q1.Value, Enum.Parse<LengthUnit>(q1.Unit, true));
+                var l2 = new QuantityLength(q2.Value, Enum.Parse<LengthUnit>(q2.Unit, true));
+
+                var c1 = l1.ConvertTo(unit);
+                var c2 = l2.ConvertTo(unit);
+
+                var result = new QuantityDTO
+                {
+                    Value = c1.Value + c2.Value,
+                    Unit = unit.ToString()
+                };
+
+                _repo.Save(new QuantityMeasurementEntity(
+                    "ADD",
+                    $"{q1.Value} {q1.Unit}",
+                    $"{q2.Value} {q2.Unit}",
+                    $"{result.Value} {result.Unit}"
+                ));
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _repo.Save(new QuantityMeasurementEntity(
+                    "ADD",
+                    $"{q1.Value} {q1.Unit}",
+                    $"{q2.Value} {q2.Unit}",
+                    ex.Message,
+                    true
+                ));
+
+                throw;
+            }
         }
+
+        // ------------------ Subtract ------------------
 
         public QuantityDTO Subtract(QuantityDTO q1, QuantityDTO q2, string targetUnit)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var unit = Enum.Parse<LengthUnit>(targetUnit, true);
+
+                var l1 = new QuantityLength(q1.Value, Enum.Parse<LengthUnit>(q1.Unit, true));
+                var l2 = new QuantityLength(q2.Value, Enum.Parse<LengthUnit>(q2.Unit, true));
+
+                var c1 = l1.ConvertTo(unit);
+                var c2 = l2.ConvertTo(unit);
+
+                var result = new QuantityDTO
+                {
+                    Value = c1.Value - c2.Value,
+                    Unit = unit.ToString()
+                };
+
+                _repo.Save(new QuantityMeasurementEntity(
+                    "SUBTRACT",
+                    $"{q1.Value} {q1.Unit}",
+                    $"{q2.Value} {q2.Unit}",
+                    $"{result.Value} {result.Unit}"
+                ));
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _repo.Save(new QuantityMeasurementEntity(
+                    "SUBTRACT",
+                    $"{q1.Value} {q1.Unit}",
+                    $"{q2.Value} {q2.Unit}",
+                    ex.Message,
+                    true
+                ));
+
+                throw;
+            }
+        }
+
+        // ------------------ Divide ------------------
+
+        public double Divide(QuantityDTO q1, QuantityDTO q2)
+        {
+            try
+            {
+                if (q2.Value == 0)
+                    throw new ArgumentException("Cannot divide by zero");
+
+                double result = q1.Value / q2.Value;
+
+                _repo.Save(new QuantityMeasurementEntity(
+                    "DIVIDE",
+                    $"{q1.Value} {q1.Unit}",
+                    $"{q2.Value} {q2.Unit}",
+                    result.ToString()
+                ));
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _repo.Save(new QuantityMeasurementEntity(
+                    "DIVIDE",
+                    $"{q1.Value} {q1.Unit}",
+                    $"{q2.Value} {q2.Unit}",
+                    ex.Message,
+                    true
+                ));
+
+                throw;
+            }
+        }
+
+        // ------------------ Convert ------------------
+
+        public QuantityDTO Convert(QuantityDTO quantity, string targetUnit)
+        {
+            try
+            {
+                var fromUnit = Enum.Parse<LengthUnit>(quantity.Unit, true);
+                var toUnit = Enum.Parse<LengthUnit>(targetUnit, true);
+
+                var length = new QuantityLength(quantity.Value, fromUnit);
+                var converted = length.ConvertTo(toUnit);
+
+                var result = new QuantityDTO
+                {
+                    Value = converted.Value,
+                    Unit = converted.Unit.ToString(),
+                };
+
+                _repo.Save(new QuantityMeasurementEntity(
+                    "CONVERT",
+                    $"{quantity.Value} {quantity.Unit}",
+                    "-",
+                    $"{result.Value} {result.Unit}"
+                ));
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _repo.Save(new QuantityMeasurementEntity(
+                    "CONVERT",
+                    $"{quantity.Value} {quantity.Unit}",
+                    "-",
+                    ex.Message,
+                    true
+                ));
+
+                throw;
+            }
+        }
+
+        // ------------------ Compare Length ------------------
+
+        public bool AreLengthsEqual(double value1, LengthUnit unit1,
+                                   double value2, LengthUnit unit2)
+        {
+            try
+            {
+                if (value1 < 0 || value2 < 0)
+                    throw new ArgumentException("Length cannot be negative");
+
+                bool result = new QuantityLength(value1, unit1)
+                    .Equals(new QuantityLength(value2, unit2));
+
+                _repo.Save(new QuantityMeasurementEntity(
+                    "COMPARE_LENGTH",
+                    $"{value1} {unit1}",
+                    $"{value2} {unit2}",
+                    result.ToString()
+                ));
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _repo.Save(new QuantityMeasurementEntity(
+                    "COMPARE_LENGTH",
+                    $"{value1} {unit1}",
+                    $"{value2} {unit2}",
+                    ex.Message,
+                    true
+                ));
+
+                throw;
+            }
+        }
+
+        // ------------------ Compare Weight ------------------
+
+        public bool AreWeightsEqual(double v1, WeightUnit u1, double v2, WeightUnit u2)
+        {
+            try
+            {
+                if (v1 < 0 || v2 < 0)
+                    throw new ArgumentException("Weight cannot be negative");
+
+                bool result = new QuantityWeight(v1, u1)
+                    .Equals(new QuantityWeight(v2, u2));
+
+                _repo.Save(new QuantityMeasurementEntity(
+                    "COMPARE_WEIGHT",
+                    $"{v1} {u1}",
+                    $"{v2} {u2}",
+                    result.ToString()
+                ));
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _repo.Save(new QuantityMeasurementEntity(
+                    "COMPARE_WEIGHT",
+                    $"{v1} {u1}",
+                    $"{v2} {u2}",
+                    ex.Message,
+                    true
+                ));
+
+                throw;
+            }
+        }
+
+        // ------------------ Compare Volume ------------------
+
+        public bool AreVolumesEqual(double v1, VolumeUnit u1, double v2, VolumeUnit u2)
+        {
+            try
+            {
+                if (v1 < 0 || v2 < 0)
+                    throw new ArgumentException("Volume cannot be negative");
+
+                bool result = new QuantityVolume(v1, u1)
+                    .Equals(new QuantityVolume(v2, u2));
+
+                _repo.Save(new QuantityMeasurementEntity(
+                    "COMPARE_VOLUME",
+                    $"{v1} {u1}",
+                    $"{v2} {u2}",
+                    result.ToString()
+                ));
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _repo.Save(new QuantityMeasurementEntity(
+                    "COMPARE_VOLUME",
+                    $"{v1} {u1}",
+                    $"{v2} {u2}",
+                    ex.Message,
+                    true
+                ));
+
+                throw;
+            }
+        }
+
+        // ------------------ Compare Temperature ------------------
+
+        public bool AreTemperaturesEqual(double v1, TemperatureUnit u1, double v2, TemperatureUnit u2)
+        {
+            try
+            {
+                bool result = new QuantityTemperature(v1, u1)
+                    .Equals(new QuantityTemperature(v2, u2));
+
+                _repo.Save(new QuantityMeasurementEntity(
+                    "COMPARE_TEMPERATURE",
+                    $"{v1} {u1}",
+                    $"{v2} {u2}",
+                    result.ToString()
+                ));
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _repo.Save(new QuantityMeasurementEntity(
+                    "COMPARE_TEMPERATURE",
+                    $"{v1} {u1}",
+                    $"{v2} {u2}",
+                    ex.Message,
+                    true
+                ));
+
+                throw;
+            }
         }
     }
 }

@@ -1,14 +1,13 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using QuantityMeasurement.Model;
 using QuantityMeasurement.Model.Entities;
 
 namespace QuantityMeasurement.Repository.Interfaces
 {
     public interface IQuantityMeasurementRepository
     {
-        void SaveMeasurement(QuantityMeasurementEntity entity);
+        void Save(QuantityMeasurementEntity entity);
 
-        List<QuantityMeasurementEntity> GetAllMeasurements();
-
-        void ClearMeasurements();
+        List<QuantityMeasurementEntity> GetAll();
     }
 }

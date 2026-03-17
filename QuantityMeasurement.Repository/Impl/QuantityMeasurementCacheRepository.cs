@@ -1,35 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using QuantityMeasurement.Model.Entities;
+﻿using System.Collections.Generic;
+using QuantityMeasurement.Model;
 using QuantityMeasurement.Repository.Interfaces;
+using QuantityMeasurement.Model.Entities;
 
-namespace QuantityMeasurement.Repository.Impl
+namespace QuantityMeasurement.Repository.Implementations
 {
     public class QuantityMeasurementCacheRepository : IQuantityMeasurementRepository
     {
-        private readonly List<QuantityMeasurementEntity> cache;
+        private readonly List<QuantityMeasurementEntity> cache = new();
 
-        public QuantityMeasurementCacheRepository()
+        public void Save(QuantityMeasurementEntity entity)
         {
-            cache = new List<QuantityMeasurementEntity>();
-        }
-
-        public void SaveMeasurement(QuantityMeasurementEntity entity)
-        {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
             cache.Add(entity);
         }
 
-        public List<QuantityMeasurementEntity> GetAllMeasurements()
+        public List<QuantityMeasurementEntity> GetAll()
         {
-            return new List<QuantityMeasurementEntity>(cache);
-        }
-
-        public void ClearMeasurements()
-        {
-            cache.Clear();
+            return cache;
         }
     }
 }
