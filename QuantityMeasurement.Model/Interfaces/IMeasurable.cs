@@ -6,5 +6,6 @@ namespace QuantityMeasurement.Model.Interfaces
         double ConvertToBaseUnit(double value);
         double ConvertFromBaseUnit(double baseValue);
         string GetUnitName();
+        void Validate(double value);
     }
 }

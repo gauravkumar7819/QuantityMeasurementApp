@@ -59,23 +59,7 @@ namespace QuantityMeasurement.Application
             var q1 = ReadQuantity();
             var q2 = ReadQuantity();
 
-            bool result = false;
-
-            if (Enum.TryParse<LengthUnit>(q1.Unit, out var l1) && Enum.TryParse<LengthUnit>(q2.Unit, out var l2))
-                result = service.AreLengthsEqual(q1.Value, l1, q2.Value, l2);
-
-            else if (Enum.TryParse<WeightUnit>(q1.Unit, out var w1) && Enum.TryParse<WeightUnit>(q2.Unit, out var w2))
-                result = service.AreWeightsEqual(q1.Value, w1, q2.Value, w2);
-
-            else if (Enum.TryParse<VolumeUnit>(q1.Unit, out var v1) && Enum.TryParse<VolumeUnit>(q2.Unit, out var v2))
-                result = service.AreVolumesEqual(q1.Value, v1, q2.Value, v2);
-
-            else if (Enum.TryParse<TemperatureUnit>(q1.Unit, out var t1) && Enum.TryParse<TemperatureUnit>(q2.Unit, out var t2))
-                result = service.AreTemperaturesEqual(q1.Value, t1, q2.Value, t2);
-
-            else
-                throw new ArgumentException("Units must be of same type.");
-
+            bool result = service.Compare(q1, q2);
             Console.WriteLine($"Result: {(result ? "Equal" : "Not Equal")}");
         }
 

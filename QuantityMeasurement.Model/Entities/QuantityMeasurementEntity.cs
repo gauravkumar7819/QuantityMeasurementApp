@@ -1,20 +1,20 @@
-﻿using System;
+using System;
 
 namespace QuantityMeasurement.Model.Entities
 {
     public class QuantityMeasurementEntity
     {
-        public string Operation { get; set; }
+        public string Operation { get; set; } = string.Empty;
 
-        public string Operand1 { get; set; }
+        public string Operand1 { get; set; } = string.Empty;
 
-        public string Operand2 { get; set; }
+        public string Operand2 { get; set; } = string.Empty;
 
-        public string Result { get; set; }
+        public string Result { get; set; } = string.Empty;
 
         public bool HasError { get; set; }
 
-        public string ErrorMessage { get; set; }
+        public string ErrorMessage { get; set; } = string.Empty;
 
         public DateTime TimeStamp { get; set; }
 

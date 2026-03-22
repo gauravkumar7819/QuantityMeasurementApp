@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using QuantityMeasurement.Business.Impl;
 using QuantityMeasurement.Model.Units;
 using QuantityMeasurement.Model.Models;
+using QuantityMeasurement.Business.Interfaces;
 
 using System;
 
@@ -11,7 +12,7 @@ namespace QuantityMeasurement.Tests
     [TestClass]
     public class LengthTests
     {
-        private QuantityMeasurementServiceImpl service;
+        private IQuantityMeasurementService service = null!;
 
         [TestInitialize]
         public void Setup()

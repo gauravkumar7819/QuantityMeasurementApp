@@ -1,5 +1,5 @@
 using System;
-using QuantityMeasurement.Model.Measurables;
+using QuantityMeasurement.Model.Measurable;
 using QuantityMeasurement.Model.Units;
 
 namespace QuantityMeasurement.Model.Models

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using QuantityMeasurement.Model;
 using QuantityMeasurement.Repository.Interfaces;
 using QuantityMeasurement.Model.Entities;
@@ -17,6 +17,11 @@ namespace QuantityMeasurement.Repository.Implementations
         public List<QuantityMeasurementEntity> GetAll()
         {
             return cache;
+        }
+
+        public void DeleteAll()
+        {
+            cache.Clear();
         }
     }
 }

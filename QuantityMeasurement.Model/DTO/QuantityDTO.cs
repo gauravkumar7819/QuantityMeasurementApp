@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace QuantityMeasurement.Model.DTO
 {
@@ -6,7 +6,7 @@ namespace QuantityMeasurement.Model.DTO
     {
         public double Value { get; set; }
 
-        public string Unit { get; set; }
+        public string Unit { get; set; } = string.Empty;
 
 
         public QuantityDTO()

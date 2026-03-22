@@ -1,5 +1,5 @@
 using System;
-using QuantityMeasurement.Model.Measurables;
+using QuantityMeasurement.Model.Measurable;
 using QuantityMeasurement.Model.Units;
 
 namespace QuantityMeasurement.Model.Models
@@ -13,9 +13,6 @@ namespace QuantityMeasurement.Model.Models
 
         public QuantityVolume(double value, VolumeUnit unit)
         {
-            if (value < 0)
-                throw new ArgumentException($"{unit} cannot be negative");
-
             _inner = new Quantity<VolumeMeasurable>(value, new VolumeMeasurable(unit));
         }
 
@@ -43,16 +40,8 @@ namespace QuantityMeasurement.Model.Models
             return new QuantityVolume(diff.Value, targetUnit);
         }
 
-        public override bool Equals(object? obj)
-        {
-            if (obj is not QuantityVolume other)
-                return false;
-
-            return _inner.Equals(other._inner);
-        }
-
+        public override bool Equals(object? obj) => obj is QuantityVolume other && _inner.Equals(other._inner);
         public override int GetHashCode() => _inner.GetHashCode();
-
         public override string ToString() => _inner.ToString();
     }
 }

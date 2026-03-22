@@ -14,6 +14,8 @@ namespace QuantityMeasurement.Model.Models
             if (!double.IsFinite(value))
                 throw new ArgumentException("Value must be a finite number");
 
+            unit.Validate(value);
+
             Value = value;
             Unit = unit;
         }

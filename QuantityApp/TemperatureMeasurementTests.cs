@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using QuantityMeasurement.Model.Units;
 using QuantityMeasurement.Model.Models;
 using QuantityMeasurement.Business.Impl;
+using QuantityMeasurement.Business.Interfaces;
 using System;
 
 namespace QuantityMeasurement.Tests
@@ -10,7 +11,7 @@ namespace QuantityMeasurement.Tests
     [TestClass]
     public class TemperatureMeasurementTests
     {
-        private QuantityMeasurementServiceImpl service;
+        private IQuantityMeasurementService service = null!;
 
         [TestInitialize]
         public void Setup()
