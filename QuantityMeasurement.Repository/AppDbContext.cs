@@ -8,5 +8,6 @@ namespace QuantityMeasurement.Repository
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {}
 
         public DbSet<QuantityMeasurementEntity> QuantityMeasurements { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 }

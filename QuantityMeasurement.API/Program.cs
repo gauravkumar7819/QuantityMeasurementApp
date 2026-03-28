@@ -1,16 +1,22 @@
-using Microsoft.EntityFrameworkCore; // ✅ ADD THIS
-using QuantityMeasurement.Repository; // ✅ ADD THIS
-
+using Microsoft.EntityFrameworkCore;
+using QuantityMeasurement.Repository;
 using QuantityMeasurement.Business.Interfaces;
 using QuantityMeasurement.Business.Impl;
 using QuantityMeasurement.Repository.Interfaces;
 using QuantityMeasurement.Repository.Implementations;
+
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services
 builder.Services.AddControllers();
 
+// DB CONFIG
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=QuantityMeasurementDB;Trusted_Connection=True;TrustServerCertificate=True"));
 
@@ -18,10 +24,66 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IQuantityMeasurementService, QuantityMeasurementServiceImpl>();
 builder.Services.AddScoped<IQuantityMeasurementRepository, QuantityMeasurementRepository>();
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// AUTH SERVICE
+builder.Services.AddScoped<AuthService>();
 
-// Configure CORS
+// JWT CONFIGURATION
+var key = "ThisIsMyVeryStrongSecretKeyForJwtToken12345";;
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+    };
+});
+
+builder.Services.AddAuthorization();
+
+// ✅ SWAGGER CONFIG (FIXED)
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    // Basic info
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "QuantityMeasurement API",
+        Version = "v1"
+    });
+
+    // JWT support in Swagger
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter: Bearer YOUR_TOKEN"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
@@ -35,9 +97,11 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Swagger
 app.UseSwagger();
 app.UseSwaggerUI();
 
+// CORS
 app.UseCors("AllowReactApp");
 
 // Global Exception Handler
@@ -47,17 +111,23 @@ app.UseExceptionHandler(errorApp =>
     {
         context.Response.StatusCode = StatusCodes.Status400BadRequest;
         context.Response.ContentType = "application/json";
+
         var exception = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
+
         if (exception != null)
         {
-            var errorMessage = exception.Error.Message;
-            await context.Response.WriteAsJsonAsync(new { error = errorMessage });
+            await context.Response.WriteAsJsonAsync(new
+            {
+                error = exception.Error.Message
+            });
         }
     });
 });
 
 app.UseHttpsRedirection();
 
+// AUTH ORDER IMPORTANT
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
