@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore; // ✅ ADD THIS
+using QuantityMeasurement.Repository; // ✅ ADD THIS
+
 using QuantityMeasurement.Business.Interfaces;
 using QuantityMeasurement.Business.Impl;
 using QuantityMeasurement.Repository.Interfaces;
@@ -8,9 +11,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services
 builder.Services.AddControllers();
 
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=QuantityMeasurementDB;Trusted_Connection=True;TrustServerCertificate=True"));
+
 // DI Injection
 builder.Services.AddScoped<IQuantityMeasurementService, QuantityMeasurementServiceImpl>();
-builder.Services.AddScoped<IQuantityMeasurementRepository, QuantityMeasurementADORepository>();
+builder.Services.AddScoped<IQuantityMeasurementRepository, QuantityMeasurementRepository>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

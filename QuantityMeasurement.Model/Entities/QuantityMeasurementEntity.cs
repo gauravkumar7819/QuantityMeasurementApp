@@ -1,20 +1,24 @@
 using System;
+using System.ComponentModel.DataAnnotations; 
 
 namespace QuantityMeasurement.Model.Entities
 {
     public class QuantityMeasurementEntity
     {
+        [Key] 
+        public int Id { get; set; }
+
         public string Operation { get; set; } = string.Empty;
 
         public string Operand1 { get; set; } = string.Empty;
 
         public string Operand2 { get; set; } = string.Empty;
 
-        public string Result { get; set; } = string.Empty;
+        public string? Result { get; set; } // nullable better
 
         public bool HasError { get; set; }
 
-        public string ErrorMessage { get; set; } = string.Empty;
+        public string? ErrorMessage { get; set; } // nullable better
 
         public DateTime TimeStamp { get; set; }
 

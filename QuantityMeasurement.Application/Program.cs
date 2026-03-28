@@ -10,7 +10,7 @@ namespace QuantityMeasurement.Application
     {
         static void Main()
         {
-            IQuantityMeasurementRepository repo = new QuantityMeasurementADORepository();
+            IQuantityMeasurementRepository repo = new QuantityMeasurementRepository();
             IQuantityMeasurementService service = new QuantityMeasurementServiceImpl(repo);
 
             IMenu menu = new Menu();
