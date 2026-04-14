@@ -4,6 +4,7 @@ using QuantityMeasurement.Business.Interfaces;
 using QuantityMeasurement.Business.Impl;
 using QuantityMeasurement.Repository.Interfaces;
 using QuantityMeasurement.Repository.Implementations;
+using QuantityMeasurement.API.Services;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -17,15 +18,31 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services
 builder.Services.AddControllers();
 
-// DB CONFIG (PostgreSQL) - Production Ready with Retry Logic
+// DB CONFIG (PostgreSQL)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Handle environment variable substitution
-if (connectionString?.StartsWith("${") == true)
+// Handle environment variable substitution and URI conversion
+if (!string.IsNullOrEmpty(connectionString))
 {
-    var envVar = connectionString.Substring(2, connectionString.Length - 3);
-    connectionString = Environment.GetEnvironmentVariable(envVar) 
-        ?? throw new InvalidOperationException($"Environment variable '{envVar}' not found");
+    if (connectionString.StartsWith("${") && connectionString.EndsWith("}"))
+    {
+        var envVar = connectionString.Substring(2, connectionString.Length - 3);
+        connectionString = Environment.GetEnvironmentVariable(envVar) 
+            ?? throw new InvalidOperationException($"Environment variable '{envVar}' not found");
+    }
+
+    if (connectionString.StartsWith("postgresql://"))
+    {
+        var uri = new Uri(connectionString);
+        var userInfo = uri.UserInfo.Split(':');
+        var host = uri.Host;
+        var dbPort = uri.Port > 0 ? uri.Port : 5432;
+        var database = uri.AbsolutePath.TrimStart('/');
+        var username = userInfo[0];
+        var password = userInfo.Length > 1 ? userInfo[1] : "";
+
+        connectionString = $"Host={host};Port={dbPort};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true;Timeout=30;Command Timeout=30;";
+    }
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -53,7 +70,7 @@ builder.Services.AddScoped<IQuantityMeasurementRepository, QuantityMeasurementRe
 builder.Services.AddScoped<AuthService>();
 
 // JWT CONFIGURATION
-var key = "ThisIsMyVeryStrongSecretKeyForJwtToken12345";;
+var key = "ThisIsMyVeryStrongSecretKeyForJwtToken12345";
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
