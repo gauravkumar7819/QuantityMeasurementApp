@@ -59,7 +59,7 @@ namespace QuantityMeasurement.Repository.Migrations
                     b.ToTable("QuantityMeasurements");
                 });
 
-            modelBuilder.Entity("User", b =>
+            modelBuilder.Entity("QuantityMeasurement.Model.Entities.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
