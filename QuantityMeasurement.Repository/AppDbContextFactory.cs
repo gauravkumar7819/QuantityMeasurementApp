@@ -29,7 +29,7 @@ namespace QuantityMeasurement.Repository
             if (string.IsNullOrEmpty(connectionString))
             {
                 // Use hardcoded connection string for design time
-                var designTimeConnectionString = "Server=dpg-df4c1h5p8ra73s9169-a.oregon-postgres.render.com;Port=5432;Database=quantitymeasurementdb_ruab;User Id=quantitymeasurementdb_ruab_user;Password=dfpSD1O3C4uBQTEN0hq3ZLJtuQ94NhtT;SslMode=Require;TrustServerCertificate=true;";
+                var designTimeConnectionString = "Server=dpg-d7adklh5pdvs73dd9i60-a.oregon-postgres.render.com;Port=5432;Database=quantitymeasurementdb_zueb;User Id=quantitymeasurementdb_zueb_user;Password=dfpSD1O3C4uBQTEN0hq3ZLJtuQ94NhtT;SslMode=Require;TrustServerCertificate=true;";
                 connectionString = designTimeConnectionString;
             }
 
