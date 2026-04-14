@@ -20,6 +20,14 @@ builder.Services.AddControllers();
 // DB CONFIG (PostgreSQL) - Production Ready with Retry Logic
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
+// Handle environment variable substitution
+if (connectionString?.StartsWith("${") == true)
+{
+    var envVar = connectionString.Substring(2, connectionString.Length - 3);
+    connectionString = Environment.GetEnvironmentVariable(envVar) 
+        ?? throw new InvalidOperationException($"Environment variable '{envVar}' not found");
+}
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseNpgsql(connectionString, npgsqlOptions =>
