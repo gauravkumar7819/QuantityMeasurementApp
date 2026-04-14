@@ -11,14 +11,6 @@ services:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
       - key: DATABASE_URL
-        fromDatabase:
-          name: quantitymeasurementdb_ruab
-          property: connectionString
+        value: postgresql://quantitymeasurementdb_zueb_user:dfpSD1O3C4uBQTEN0hq3ZLJtuQ94NhtT@dpg-d7adklh5pdvs73dd9i60-a.oregon-postgres.render.com/quantitymeasurementdb_zueb
       - key: JWT_SECRET
         generateValue: true
-
-  # PostgreSQL Database
-  - type: postgres
-    name: quantitymeasurementdb_ruab
-    plan: free
-    ipAllowList: []
