@@ -18,7 +18,7 @@ builder.Services.AddControllers();
 
 // DB CONFIG
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=QuantityMeasurementDB;Trusted_Connection=True;TrustServerCertificate=True"));
+    options.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=QuantityMeasurementDB;Trusted_Connection=True;TrustServerCertificate=True;Encrypt=false"));
 
 // DI Injection
 builder.Services.AddScoped<IQuantityMeasurementService, QuantityMeasurementServiceImpl>();
