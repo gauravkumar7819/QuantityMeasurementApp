@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore.SqlServer;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 using System.IO;
 
 namespace QuantityMeasurement.Repository
@@ -26,17 +26,21 @@ namespace QuantityMeasurement.Repository
                 connectionString = Environment.GetEnvironmentVariable(envVar);
             }
 
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                // Use hardcoded connection string for design time
+                var designTimeConnectionString = "Server=dpg-df4c1h5p8ra73s9169-a.oregon-postgres.render.com;Port=5432;Database=quantitymeasurementdb_ruab;User Id=quantitymeasurementdb_ruab_user;Password=dfpSD1O3C4uBQTEN0hq3ZLJtuQ94NhtT;SslMode=Require;TrustServerCertificate=true;";
+                connectionString = designTimeConnectionString;
+            }
+
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
 
-            // Use hardcoded connection string for design time
-            var designTimeConnectionString = "Server=localhost\\SQLEXPRESS;Database=QuantityMeasurementDB;Trusted_Connection=True;TrustServerCertificate=True;Encrypt=false";
-
-            optionsBuilder.UseSqlServer(designTimeConnectionString, sqlServerOptions =>
+            optionsBuilder.UseNpgsql(connectionString, npgsqlOptions =>
             {
-                sqlServerOptions.EnableRetryOnFailure(
+                npgsqlOptions.EnableRetryOnFailure(
                     maxRetryCount: 3,
                     maxRetryDelay: TimeSpan.FromSeconds(5),
-                    errorNumbersToAdd: null);
+                    errorCodesToAdd: null);
             });
 
             return new AppDbContext(optionsBuilder.Options);

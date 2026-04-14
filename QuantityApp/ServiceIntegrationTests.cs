@@ -3,6 +3,8 @@ using QuantityMeasurement.Business.Interfaces;
 using QuantityMeasurement.Business.Impl;
 using QuantityMeasurement.Repository.Interfaces;
 using QuantityMeasurement.Repository.Implementations;
+using QuantityMeasurement.Repository;
+using Microsoft.EntityFrameworkCore;
 using QuantityMeasurement.Model.Units;
 using System.Linq;
 
@@ -15,7 +17,11 @@ namespace QuantityMeasurement.Tests
         public void ServiceWithDatabaseRepository_ShouldPersistData()
         {
             // Arrange
-            IQuantityMeasurementRepository dbRepo = new QuantityMeasurementADORepository();
+            var options = new DbContextOptionsBuilder<AppDbContext>()
+                .UseInMemoryDatabase(databaseName: "TestDatabase")
+                .Options;
+            var context = new AppDbContext(options);
+            IQuantityMeasurementRepository dbRepo = new QuantityMeasurementRepository(context);
             dbRepo.DeleteAll(); // Clean slate
             IQuantityMeasurementService service = new QuantityMeasurementServiceImpl(dbRepo);
 
