@@ -24,7 +24,7 @@ namespace QuantityMeasurement.Model.Entities
 
         public QuantityMeasurementEntity()
         {
-            TimeStamp = DateTime.Now;
+            TimeStamp = DateTime.UtcNow;
         }
 
         public QuantityMeasurementEntity(
@@ -38,7 +38,7 @@ namespace QuantityMeasurement.Model.Entities
             Operand2 = operand2;
             Result = result;
             HasError = false;
-            TimeStamp = DateTime.Now;
+            TimeStamp = DateTime.UtcNow;
         }
 
         public QuantityMeasurementEntity(
@@ -53,7 +53,7 @@ namespace QuantityMeasurement.Model.Entities
             Operand2 = operand2;
             ErrorMessage = errorMessage;
             HasError = hasError;
-            TimeStamp = DateTime.Now;
+            TimeStamp = DateTime.UtcNow;
         }
 
         public override string ToString()

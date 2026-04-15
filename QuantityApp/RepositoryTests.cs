@@ -77,7 +77,7 @@
 //         {
 //             // Arrange
 //             var entity = new QuantityMeasurementEntity("CONVERT", "100 C", "-", "212 F");
-//             var timeBeforeSave = System.DateTime.Now;
+//             var timeBeforeSave = System.DateTime.UtcNow;
 
 //             // Act
 //             _adoRepository.Save(entity);
