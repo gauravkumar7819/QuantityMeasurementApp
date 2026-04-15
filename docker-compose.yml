@@ -1,0 +1,150 @@
+version: '3.8'
+
+services:
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./api-gateway/ApiGateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Jwt__Secret=YourSuperSecretKeyForJWTValidation123456789
+      - Jwt__Issuer=QuantityMeasurementAPI
+      - Jwt__Audience=QuantityMeasurementClients
+    depends_on:
+      - auth-service
+      - quantity-service
+      - history-service
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  # Auth Service
+  auth-service:
+    build:
+      context: ./auth-service/Auth.API
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - "5001:5001"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=auth-db;Port=5432;Database=authdb;Username=auth_user;Password=auth_password;SslMode=Require;TrustServerCertificate=true;
+      - ConnectionStrings__Redis=auth-redis:6379
+      - Jwt__Key=YourSuperSecretKeyForJWTTokenGeneration123456789
+      - Jwt__Issuer=QuantityMeasurementAuth
+      - Jwt__Audience=QuantityMeasurementServices
+      - Jwt__ExpirationMinutes=60
+    depends_on:
+      - auth-db
+      - auth-redis
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  # Quantity Service
+  quantity-service:
+    build:
+      context: ./quantity-service/Quantity.API
+      dockerfile: Dockerfile
+    container_name: quantity-service
+    ports:
+      - "5002:5002"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=quantity-db;Port=5432;Database=quantitydb;Username=quantity_user;Password=quantity_password;SslMode=Require;TrustServerCertificate=true;
+      - ConnectionStrings__Redis=quantity-redis:6379
+    depends_on:
+      - quantity-db
+      - quantity-redis
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  # History Service
+  history-service:
+    build:
+      context: ./history-service/History.API
+      dockerfile: Dockerfile
+    container_name: history-service
+    ports:
+      - "5003:5003"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=history-db;Port=5432;Database=historydb;Username=history_user;Password=history_password;SslMode=Require;TrustServerCertificate=true;
+    depends_on:
+      - history-db
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  # PostgreSQL Databases
+  auth-db:
+    image: postgres:15
+    container_name: auth-db
+    environment:
+      - POSTGRES_DB=authdb
+      - POSTGRES_USER=auth_user
+      - POSTGRES_PASSWORD=auth_password
+    volumes:
+      - auth-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  quantity-db:
+    image: postgres:15
+    container_name: quantity-db
+    environment:
+      - POSTGRES_DB=quantitydb
+      - POSTGRES_USER=quantity_user
+      - POSTGRES_PASSWORD=quantity_password
+    volumes:
+      - quantity-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  history-db:
+    image: postgres:15
+    container_name: history-db
+    environment:
+      - POSTGRES_DB=historydb
+      - POSTGRES_USER=history_user
+      - POSTGRES_PASSWORD=history_password
+    volumes:
+      - history-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  # Redis Instances
+  auth-redis:
+    image: redis:7-alpine
+    container_name: auth-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+  quantity-redis:
+    image: redis:7-alpine
+    container_name: quantity-redis
+    ports:
+      - "6380:6379"
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+networks:
+  microservices-network:
+    driver: bridge
+
+volumes:
+  auth-data:
+  quantity-data:
+  history-data:

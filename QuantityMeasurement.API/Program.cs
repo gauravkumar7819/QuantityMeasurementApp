@@ -66,26 +66,43 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IQuantityMeasurementService, QuantityMeasurementServiceImpl>();
 builder.Services.AddScoped<IQuantityMeasurementRepository, QuantityMeasurementRepository>();
 
-// AUTH SERVICE
-builder.Services.AddScoped<AuthService>();
+// AUTH SERVICES
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+// HISTORY SERVICES
+builder.Services.AddScoped<IHistoryRepository, HistoryRepository>();
+builder.Services.AddScoped<IHistoryService, HistoryService>();
 
 // JWT CONFIGURATION
-var key = "ThisIsMyVeryStrongSecretKeyForJwtToken12345";
+var jwtSecret = builder.Configuration["Authentication:Jwt:Secret"] 
+    ?? throw new InvalidOperationException("JWT Secret is not configured in appsettings.json");
+
+var jwtIssuer = builder.Configuration["Authentication:Jwt:Issuer"] ?? "QuantityMeasurementAPI";
+var jwtAudience = builder.Configuration["Authentication:Jwt:Audience"] ?? "QuantityMeasurementClients";
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = false,
-        ValidateAudience = false,
+        ValidateIssuer = true,
+        ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+        ClockSkew = TimeSpan.Zero
     };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+});
 
 // ✅ SWAGGER CONFIG (FIXED)
 builder.Services.AddEndpointsApiExplorer();
